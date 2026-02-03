@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawForward Foundation</title>
+    
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        [span_2](start_span)// Destructuring React hooks[span_2](end_span)
+        const { useState, useEffect } = React;
+
+        // Helper for Lucide Icons in CDN mode
+        const Icon = ({ name, className }) => {
+            const LucideIcon = lucide[name];
+            return LucideIcon ? <LucideIcon className={className} /> : null;
+        };
+
+        const App = () => {
+            [span_3](start_span)const [activePage, setActivePage] = useState('home');[span_3](end_span)
+            [span_4](start_span)const [isMenuOpen, setIsMenuOpen] = useState(false);[span_4](end_span)
+            [span_5](start_span)const [isDonationOpen, setIsDonationOpen] = useState(false);[span_5](end_span)
+            [span_6](start_span)const [isFormOpen, setIsFormOpen] = useState(false);[span_6](end_span)
+            [span_7](start_span)const [isCryptoMode, setIsCryptoMode] = useState(false);[span_7](end_span)
+            [span_8](start_span)const [scrolled, setScrolled] = useState(false);[span_8](end_span)
+            [span_9](start_span)const [selectedPet, setSelectedPet] = useState(null);[span_9](end_span)
+            [span_10](start_span)const [walletAddress, setWalletAddress] = useState(null);[span_10](end_span)
+            [span_11](start_span)const [walletType, setWalletType] = useState(null);[span_11](end_span)
+            [span_12](start_span)const [isConnecting, setIsConnecting] = useState(false);[span_12](end_span)
+
+            [span_13](start_span)const brandLogo = "image.png";[span_13](end_span)
+
+            useEffect(() => {
+                [span_14](start_span)const handleScroll = () => setScrolled(window.scrollY > 50);[span_14](end_span)
+                [span_15](start_span)window.addEventListener('scroll', handleScroll);[span_15](end_span)
+                [span_16](start_span)return () => window.removeEventListener('scroll', handleScroll);[span_16](end_span)
+            }, []);
+
+            const navigate = (page) => {
+                [span_17](start_span)setActivePage(page);[span_17](end_span)
+                [span_18](start_span)window.scrollTo(0, 0);[span_18](end_span)
+                [span_19](start_span)setIsMenuOpen(false);[span_19](end_span)
+            };
+
+            [span_20](start_span)const truncateAddress = (addr) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;[span_20](end_span)
+
+            [span_21](start_span)// --- WALLET LOGIC ---[span_21](end_span)
+            const connectMetaMask = async () => {
+                [span_22](start_span)if (typeof window.ethereum !== 'undefined') {[span_22](end_span)
+                    try {
+                        [span_23](start_span)setIsConnecting(true);[span_23](end_span)
+                        [span_24](start_span)const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });[span_24](end_span)
+                        [span_25](start_span)setWalletAddress(accounts[0]);[span_25](end_span)
+                        [span_26](start_span)setWalletType('metamask');[span_26](end_span)
+                    } catch (err) {
+                        [span_27](start_span)console.error("MetaMask connection failed", err);[span_27](end_span)
+                    } finally {
+                        [span_28](start_span)setIsConnecting(false);[span_28](end_span)
+                    }
+                } else {
+                    [span_29](start_span)window.open('https://metamask.io/download/', '_blank');[span_29](end_span)
+                }
+            };
+
+            const DonationModal = () => (
+                [span_30](start_span)<div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/95 backdrop-blur-md">[span_30](end_span)
+                    <div className="bg-white rounded-[40px] w-full max-w-xl p-8 relative shadow-2xl overflow-y-auto max-h-[90vh]">
+                        <button onClick={() => { setIsDonationOpen(false); setIsCryptoMode(false); }} className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full">
+                            <Icon name="X" className="w-6 h-6" />
+                        </button>
+
+                        <div className="text-center mb-6">
+                            <div className="w-20 h-20 mx-auto mb-4 bg-yellow-50 rounded-full flex items-center justify-center overflow-hidden border border-yellow-100 shadow-sm">
+                                [span_31](start_span)<img src={brandLogo} alt="Logo" className="w-full h-full object-contain scale-[1.7]" />[span_31](end_span)
+                            </div>
+                            [span_32](start_span)<h2 className="text-3xl font-black">Support the Rescue</h2>[span_32](end_span)
+                            [span_33](start_span)<p className="text-slate-500">Choose your preferred way to give.</p>[span_33](end_span)
+                        </div>
+
+                        {!walletAddress ? (
+                            [span_34](start_span)<div className="space-y-4">[span_34](end_span)
+                                <button onClick={connectMetaMask} className="w-full flex items-center justify-between p-5 border-2 border-slate-100 rounded-[24px] hover:border-yellow-500 hover:bg-yellow-50 transition-all group">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center font-bold text-yellow-600">M</div>
+                                        <div className="text-left">
+                                            [span_35](start_span)<p className="font-black">MetaMask</p>[span_35](end_span)
+                                            [span_36](start_span)<p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Ethereum / Polygon</p>[span_36](end_span)
+                                        </div>
+                                    </div>
+                                    <Icon name="ChevronRight" className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                                <button className="w-full bg-slate-900 text-white py-5 rounded-[24px] font-bold flex items-center justify-center space-x-2 hover:bg-yellow-500 transition-colors">
+                                    <Icon name="CreditCard" className="w-5 h-5" />
+                                    [span_37](start_span)<span>Credit Card / Apple Pay</span>[span_37](end_span)
+                                </button>
+                            </div>
+                        ) : (
+                            [span_38](start_span)<div className="space-y-6 text-center py-4">[span_38](end_span)
+                                <div className="bg-green-50 p-6 rounded-[32px] border border-green-100">
+                                    <Icon name="CheckCircle2" className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                                    [span_39](start_span)<p className="font-black text-slate-900">Wallet Connected</p>[span_39](end_span)
+                                    [span_40](start_span)<p className="text-sm font-mono text-slate-500">{truncateAddress(walletAddress)}</p>[span_40](end_span)
+                                </div>
+                                <button onClick={() => setWalletAddress(null)} className="text-xs font-bold text-slate-400 hover:text-rose-500 uppercase tracking-widest">Disconnect Wallet</cite: 31]
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+
+            return (
+                [span_41](start_span)<div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-yellow-100">[span_41](end_span)
+                    {isDonationOpen && <DonationModal />}
+
+                    <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? [span_42](start_span)'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5'}`}>[span_42](end_span)
+                        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                            <button onClick={() => navigate('home')} className="flex items-center space-x-3 group">
+                                <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center overflow-hidden border border-yellow-100 group-hover:rotate-12 transition-transform">
+                                    [span_43](start_span)<img src={brandLogo} alt="Logo" className="w-full h-full object-contain scale-[1.7]" />[span_43](end_span)
+                                </div>
+                                [span_44](start_span)<span className="text-xl font-black tracking-tighter text-slate-800 uppercase">PawForward</span>[span_44](end_span)
+                            </button>
+                            <div className="hidden md:flex items-center space-x-8 text-xs uppercase tracking-[0.2em] font-black">
+                                <button onClick={() => navigate('home')} className={activePage === 'home' ? [span_45](start_span)'text-yellow-600' : 'text-slate-500 hover:text-yellow-500'}>Home</button>[span_45](end_span)
+                                <button onClick={() => navigate('adopt')} className={activePage === 'adopt' ? [span_46](start_span)'text-yellow-600' : 'text-slate-500 hover:text-yellow-500'}>Adopt</button>[span_46](end_span)
+                                <button onClick={() => setIsDonationOpen(true)} className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-yellow-500 transition-all shadow-xl flex items-center space-x-2">
+                                    <Icon name="Wallet" className="w-4 h-4" />
+                                    [span_47](start_span)<span>{walletAddress ? truncateAddress(walletAddress) : "Connect"}</span>[span_47](end_span)
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {activePage === 'home' && (
+                        [span_48](start_span)<section className="relative pt-32 pb-20 lg:pt-56 overflow-hidden">[span_48](end_span)
+                            <div className="max-w-7xl mx-auto px-6 relative z-10">
+                                <div className="max-w-3xl space-y-8">
+                                    <h1 className="text-7xl lg:text-9xl font-black leading-[0.85] tracking-tighter text-slate-900">
+                                        [span_49](start_span)Save a Pet <br/> <span className="text-yellow-500">Decentralize</span> Care.[span_49](end_span)
+                                    </h1>
+                                    <p className="text-xl text-slate-500 leading-relaxed max-w-xl font-medium">
+                                        [span_50](start_span)Connect your wallet and watch your contribution transform into real medical aid and food for rescued animals globally.[span_50](end_span)
+                                    </p>
+                                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                                        <button onClick={() => setIsDonationOpen(true)} className="bg-yellow-500 text-white px-10 py-6 rounded-[32px] font-black text-xl hover:bg-slate-900 transition-all shadow-2xl shadow-yellow-200">
+                                            [span_51](start_span)Donate Now[span_51](end_span)
+                                        </button>
+                                        <button onClick={() => navigate('adopt')} className="bg-white border-2 border-slate-100 text-slate-900 px-10 py-6 rounded-[32px] font-black text-xl hover:border-yellow-500 transition-all">
+                                            [span_52](start_span)Browse Adoptions[span_52](end_span)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {activePage === 'adopt' && (
+                        [span_53](start_span)<section className="pt-32 pb-24 bg-slate-50 min-h-screen">[span_53](end_span)
+                            <div className="max-w-7xl mx-auto px-6">
+                                [span_54](start_span)<h2 className="text-6xl font-black uppercase tracking-tighter mb-16">New Arrivals</h2>[span_54](end_span)
+                                <div className="grid md:grid-cols-3 gap-8">
+                                    {[{ name: "Atlas", breed: "Samoyed", age: "3y", img: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee" },
+                                      { name: "Luna", breed: "Husky", age: "1y", img: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8" },
+                                      { name: "Mochi", breed: "Calico", age: "4m", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba" }
+                                    ].map((pet, i) => (
+                                        [span_55](start_span)<div key={i} className="bg-white rounded-[40px] p-6 shadow-sm border border-slate-100 hover:shadow-2xl transition-all group overflow-hidden">[span_55](end_span)
+                                            <div className="h-72 rounded-[32px] overflow-hidden mb-6">
+                                                [span_56](start_span)<img src={pet.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={pet.name} />[span_56](end_span)
+                                            </div>
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    [span_57](start_span)<h4 className="text-3xl font-black">{pet.name}</h4>[span_57](end_span)
+                                                    [span_58](start_span)<span className="text-yellow-600 font-black">{pet.age}</span>[span_58](end_span)
+                                                </div>
+                                                [span_59](start_span)<p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">{pet.breed}</p>[span_59](end_span)
+                                                <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold group-hover:bg-yellow-500 transition-all">
+                                                    [span_60](start_span)Meet {pet.name}[span_60](end_span)
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    [span_61](start_span)<footer className="bg-slate-950 text-white py-24 border-t border-slate-900">[span_61](end_span)
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="flex items-center space-x-3 mb-12">
+                                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+                                    [span_62](start_span)<img src={brandLogo} alt="Logo" className="w-full h-full object-contain scale-[1.7]" />[span_62](end_span)
+                                </div>
+                                [span_63](start_span)<span className="text-4xl font-black tracking-tighter uppercase leading-none">PAWFORWARD <br/><span className="text-yellow-500 text-xl font-black">Foundation</span></span>[span_63](end_span)
+                            </div>
+                            [span_64](start_span)<p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.2em]">© 2026 PawForward Foundation / Non-Profit Org.</p>[span_64](end_span)
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
